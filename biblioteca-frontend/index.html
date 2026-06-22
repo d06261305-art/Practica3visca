@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Biblioteca NoSQL</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <div>
+        <p>Practica alternativa</p>
+        <h1>Biblioteca NoSQL</h1>
+      </div>
+      <input id="busqueda" type="search" placeholder="Buscar libro">
+    </header>
+
+    <section class="grid">
+      <form id="formLibro" class="panel">
+        <h2 id="tituloFormulario">Registrar libro</h2>
+        <input type="hidden" id="libroId">
+        <label>Titulo
+          <input id="titulo" required>
+        </label>
+        <label>Autor
+          <input id="autor" required>
+        </label>
+        <label>Genero
+          <input id="genero" required>
+        </label>
+        <label>Anio
+          <input id="anio" type="number" min="0" required>
+        </label>
+        <label>Estado
+          <select id="estado">
+            <option>Disponible</option>
+            <option>Prestado</option>
+            <option>Reservado</option>
+          </select>
+        </label>
+        <div class="actions">
+          <button type="submit">Guardar</button>
+          <button type="button" id="cancelar">Cancelar</button>
+        </div>
+      </form>
+
+      <section class="panel">
+        <h2>Catalogo</h2>
+        <div id="listaLibros" class="cards"></div>
+      </section>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
