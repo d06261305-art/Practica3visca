@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const path = require("path");
 require("dotenv").config();
 
 const app = express();
@@ -8,6 +9,13 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+
+// Servir archivos del frontend
+app.use(
+  express.static(
+    path.join(__dirname, "../biblioteca-frontend")
+  )
+);
 
 mongoose
   .connect(process.env.MONGO_URI)
@@ -31,12 +39,16 @@ const LibroSchema = new mongoose.Schema(
 
 const Libro = mongoose.model("Libro", LibroSchema);
 
+// Mostrar index.html al entrar a la raíz
 app.get("/", (req, res) => {
-  res.json({ mensaje: "API de biblioteca activa" });
+  res.sendFile(
+    path.join(__dirname, "../biblioteca-frontend/index.html")
+  );
 });
 
 app.get("/libros", async (req, res) => {
   const q = (req.query.q || "").trim();
+
   const filtro = q
     ? {
         $or: [
@@ -49,15 +61,20 @@ app.get("/libros", async (req, res) => {
     : {};
 
   const libros = await Libro.find(filtro).sort({ createdAt: -1 });
+
   res.json(libros);
 });
 
 app.get("/libros/:id", async (req, res) => {
   try {
     const libro = await Libro.findById(req.params.id);
-    if (!libro) return res.status(404).json({ mensaje: "Libro no encontrado" });
+
+    if (!libro) {
+      return res.status(404).json({ mensaje: "Libro no encontrado" });
+    }
+
     res.json(libro);
-  } catch (error) {
+  } catch {
     res.status(400).json({ mensaje: "ID invalido" });
   }
 });
@@ -65,33 +82,68 @@ app.get("/libros/:id", async (req, res) => {
 app.post("/libros", async (req, res) => {
   try {
     const libro = await Libro.create(req.body);
-    res.status(201).json({ mensaje: "Libro registrado", libro });
+
+    res.status(201).json({
+      mensaje: "Libro registrado",
+      libro
+    });
   } catch (error) {
-    res.status(400).json({ mensaje: "Datos invalidos", detalle: error.message });
+    res.status(400).json({
+      mensaje: "Datos invalidos",
+      detalle: error.message
+    });
   }
 });
 
 app.put("/libros/:id", async (req, res) => {
   try {
-    const libro = await Libro.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true
+    const libro = await Libro.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      {
+        new: true,
+        runValidators: true
+      }
+    );
+
+    if (!libro) {
+      return res.status(404).json({
+        mensaje: "Libro no encontrado"
+      });
+    }
+
+    res.json({
+      mensaje: "Libro actualizado",
+      libro
     });
-    if (!libro) return res.status(404).json({ mensaje: "Libro no encontrado" });
-    res.json({ mensaje: "Libro actualizado", libro });
   } catch (error) {
-    res.status(400).json({ mensaje: "No se pudo actualizar", detalle: error.message });
+    res.status(400).json({
+      mensaje: "No se pudo actualizar",
+      detalle: error.message
+    });
   }
 });
 
 app.delete("/libros/:id", async (req, res) => {
   try {
     const libro = await Libro.findByIdAndDelete(req.params.id);
-    if (!libro) return res.status(404).json({ mensaje: "Libro no encontrado" });
-    res.json({ mensaje: "Libro eliminado" });
-  } catch (error) {
-    res.status(400).json({ mensaje: "No se pudo eliminar" });
+
+    if (!libro) {
+      return res.status(404).json({
+        mensaje: "Libro no encontrado"
+      });
+    }
+
+    res.json({
+      mensaje: "Libro eliminado"
+    });
+  } catch {
+    res.status(400).json({
+      mensaje: "No se pudo eliminar"
+    });
   }
 });
 
-app.listen(PORT, () => console.log(`Servidor de biblioteca en puerto ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Servidor de biblioteca en puerto ${PORT}`);
+});
