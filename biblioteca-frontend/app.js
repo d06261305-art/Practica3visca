@@ -1,4 +1,4 @@
-const API_URL = "/libros";
+const API_URL = "https://practica3visca.onrender.com/libros";
 
 const form = document.getElementById("formLibro");
 const listaLibros = document.getElementById("listaLibros");
